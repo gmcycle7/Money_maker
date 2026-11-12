@@ -1,0 +1,96 @@
+---
+/**
+ * 計算機頁共用版面：
+ *  - 左：計算機（default slot）＋ 說明文章（slot="article"）＋ FAQ
+ *  - 右：廣告 + 聯盟商品 + 相關工具
+ */
+import Base from './Base.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import AdSlot from '../components/AdSlot.astro';
+import OfferList from '../components/OfferList.astro';
+import RelatedTools from '../components/RelatedTools.astro';
+import Faq, { type FaqItem } from '../components/Faq.astro';
+import { SITE } from '../config/site.ts';
+import { getTool } from '../lib/tools.ts';
+
+interface Props {
+  slug: string;
+  faq?: FaqItem[];
+  /** 最後更新日期（顯示給使用者，YMYL 內容很重要） */
+  updated: string;
+  /** 本頁引用的官方來源 */
+  sources?: { name: string; href: string }[];
+}
+
+const { slug, faq = [], updated, sources = [] } = Astro.props;
+const tool = getTool(slug);
+const path = `/tools/${tool.slug}`;
+const siteUrl = (Astro.site ?? new URL(SITE.url)).toString().replace(/\/$/, '');
+
+const appLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: `${tool.title}｜${SITE.name}`,
+  url: `${siteUrl}${path}`,
+  description: tool.description,
+  applicationCategory: 'FinanceApplication',
+  operatingSystem: 'Web',
+  browserRequirements: 'Requires JavaScript',
+  inLanguage: 'zh-TW',
+  isAccessibleForFree: true,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'TWD' },
+  dateModified: updated,
+  publisher: { '@type': 'Organization', name: SITE.name },
+};
+---
+
+<Base title={tool.seoTitle} description={tool.description} path={path} jsonLd={[appLd]} modifiedTime={updated}>
+  <div class="container">
+    <Breadcrumb items={[{ name: '試算工具', href: '/tools' }, { name: tool.title }]} />
+    <header class="page-head">
+      <h1>{tool.icon} {tool.title}</h1>
+      <p class="lead">{tool.description}</p>
+      <p class="muted" style="font-size:.85rem">最後更新：{updated}　·　免費使用、資料只在你的瀏覽器計算、不會上傳。</p>
+    </header>
+
+    <AdSlot slot="headerBanner" format="horizontal" label="頂部橫幅" />
+
+    <div class="grid-2">
+      <div class="stack">
+        <slot />
+
+        <AdSlot slot="inArticle" format="fluid" label="文中廣告" />
+
+        <article class="card prose">
+          <slot name="article" />
+          {
+            sources.length > 0 && (
+              <>
+                <h2>資料來源</h2>
+                <ul>
+                  {sources.map((s) => (
+                    <li>
+                      <a href={s.href} target="_blank" rel="noopener">
+                        {s.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )
+          }
+        </article>
+
+        <Faq items={faq} />
+        <RelatedTools slug={slug} />
+      </div>
+
+      <aside class="stack sticky-aside">
+        <OfferList category={tool.offers} compact />
+        <AdSlot slot="sidebar" format="rectangle" label="側欄廣告" />
+      </aside>
+    </div>
+
+    <AdSlot slot="footer" format="horizontal" label="底部橫幅" />
+  </div>
+</Base>

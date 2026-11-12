@@ -1,0 +1,36 @@
+---
+import ArticleLayout from '../layouts/ArticleLayout.astro';
+import { SITE } from '../config/site.ts';
+---
+
+<ArticleLayout
+  title={`關於${SITE.name}`}
+  description={`${SITE.name}（${SITE.nameEn}）是一個免費的台灣理財試算工具網站，用最新法規參數與白話說明，幫你在買房、報稅、投資、退休前把數字算清楚。`}
+  path="/about"
+  breadcrumb={[{ name: '關於我們' }]}
+  sidebar={false}
+  type="website"
+>
+  <h2>我們在做什麼</h2>
+  <p>
+    台灣的財經資訊很多，但多半是「講給懂的人聽」。{SITE.name} 想做的是把房貸、所得稅、加班費、勞退這些每個人都會遇到的計算，
+    做成輸入數字就有答案的工具，並且把公式、法源和注意事項寫清楚，讓你知道數字是怎麼來的。
+  </p>
+  <h2>我們怎麼確保正確</h2>
+  <ul>
+    <li><strong>參數集中管理</strong>：免稅額、級距、基本工資、青安利率等全部放在同一個設定檔，每年 1 月與 5 月對照財政部、勞動部、勞保局公告更新，頁面會標示最後更新日期。</li>
+    <li><strong>公開計算邏輯</strong>：每個工具頁都有公式與範例，核心計算有自動化測試驗證。</li>
+    <li><strong>引用官方來源</strong>：每頁文末列出法規與官方公告連結。</li>
+  </ul>
+  <h2>我們不做什麼</h2>
+  <p>
+    我們不提供個別投資建議、不推薦特定股票或基金、不銷售保險。本站內容為一般資訊與教育用途，實際金額以銀行、國稅局、勞保局核定為準。
+  </p>
+  <h2>網站如何維持營運</h2>
+  <p>
+    本站免費使用，營運成本來自頁面上的 Google 廣告，以及部分頁面的聯盟行銷連結（透過連結申辦信用卡、開戶或貸款，本站可能獲得分潤，不影響你的權益與價格）。
+    詳見 <a href="/disclaimer">免責聲明與揭露</a>。
+  </p>
+  <h2>聯絡我們</h2>
+  <p>發現數字有誤、法規更新、或合作提案，歡迎寫信到 <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>，我們會在 3 個工作天內回覆。</p>
+</ArticleLayout>

@@ -1,0 +1,32 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import ToolCard from '../../components/ToolCard.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { TOOLS } from '../../lib/tools.ts';
+
+const categories = [...new Set(TOOLS.map((t) => t.category))];
+---
+
+<Base title="所有理財試算工具" description="房貸、信貸、所得稅、加班費、勞退、定期定額——免費線上理財計算機總覽，依台灣最新法規參數更新。" path="/tools">
+  <div class="container">
+    <Breadcrumb items={[{ name: '試算工具' }]} />
+    <header class="page-head">
+      <h1>所有試算工具</h1>
+      <p class="lead">依台灣最新法規與官方參數設計，免費、免登入、結果可分享。</p>
+    </header>
+    {
+      categories.map((c) => (
+        <section class="section" style="margin-top:2rem">
+          <h2>{c}</h2>
+          <div class="tool-grid">
+            {TOOLS.filter((t) => t.category === c).map((t) => (
+              <ToolCard tool={t} />
+            ))}
+          </div>
+        </section>
+      ))
+    }
+    <AdSlot slot="footer" format="horizontal" label="底部橫幅" />
+  </div>
+</Base>

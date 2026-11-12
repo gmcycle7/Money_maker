@@ -1,0 +1,13 @@
+---
+import type { Tool } from '../lib/tools.ts';
+interface Props {
+  tool: Tool;
+}
+const { tool } = Astro.props;
+---
+
+<a class="tool-card" href={`/tools/${tool.slug}`}>
+  <span class="icon" aria-hidden="true">{tool.icon}</span>
+  <h3>{tool.title}</h3>
+  <p>{tool.description}</p>
+</a>

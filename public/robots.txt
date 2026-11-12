@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# 替換成你的正式網域
+Sitemap: https://moneycalc-tw.example.com/sitemap-index.xml

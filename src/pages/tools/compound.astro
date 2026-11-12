@@ -1,0 +1,168 @@
+---
+import CalculatorLayout from '../../layouts/CalculatorLayout.astro';
+import { RATE_DEFAULTS } from '../../config/tw.ts';
+
+const faq = [
+  {
+    q: '定期定額每月 1 萬、年化 7%、投資 20 年會變多少？',
+    a: '本金 240 萬，期末約 524 萬，獲利約 284 萬。複利的威力在後半段：前 10 年獲利只有約 53 萬，後 10 年卻賺了 230 萬以上。',
+  },
+  {
+    q: '年化報酬率要填多少才合理？',
+    a: '台股加權報酬指數長期（含股利）年化約 8%–10%，全球股票約 7%–8%，但波動很大、有些年份會跌 20% 以上。保守規劃建議用 5%–7%；定存約 1.6%；高股息 ETF 近年含息年化約 6%–9%，但不保證未來。',
+  },
+  {
+    q: '複利是什麼？72 法則怎麼用？',
+    a: '複利是把獲利再投入，讓「利滾利」。72 法則可快速估算資產翻倍所需年數：72 ÷ 年化報酬率。年化 7% 約 10.3 年翻倍，年化 3% 約 24 年。',
+  },
+  {
+    q: '期初投入和期末投入差多少？',
+    a: '本頁假設每月初投入（例如每月 6 日扣款），比每月底投入多賺一個月的報酬。20 年下來差距約 0.5%–1%，影響不大，重點是持續投入。',
+  },
+];
+
+const sources = [
+  { name: '臺灣證券交易所｜發行量加權股價報酬指數', href: 'https://www.twse.com.tw/' },
+  { name: '金管會｜定期定額投資宣導', href: 'https://www.fsc.gov.tw/' },
+];
+---
+
+<CalculatorLayout slug="compound" faq={faq} updated="2026-11-08" sources={sources}>
+  <section class="card">
+    <form id="calc" class="form-grid" novalidate>
+      <div class="field">
+        <label for="initial">初始投入</label>
+        <div class="input-wrap">
+          <input id="initial" name="initial" type="number" inputmode="numeric" min="0" step="10000" value="0" />
+          <span class="suffix">元</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="monthly">每月投入</label>
+        <div class="input-wrap">
+          <input id="monthly" name="monthly" type="number" inputmode="numeric" min="0" step="1000" value="10000" />
+          <span class="suffix">元</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="rate">預期年化報酬率</label>
+        <div class="input-wrap">
+          <input id="rate" name="rate" type="number" inputmode="decimal" min="-50" max="50" step="0.1" value={RATE_DEFAULTS.investmentReturn} />
+          <span class="suffix">%</span>
+        </div>
+        <span class="hint">保守 5%，股票 ETF 長期約 7%–9%</span>
+      </div>
+      <div class="field">
+        <label for="years">投資年數</label>
+        <div class="input-wrap">
+          <input id="years" name="years" type="number" inputmode="numeric" min="1" max="60" step="1" value="20" />
+          <span class="suffix">年</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="increase">每年增加投入</label>
+        <div class="input-wrap">
+          <input id="increase" name="increase" type="number" inputmode="decimal" min="0" max="50" step="1" value="0" />
+          <span class="suffix">%／年</span>
+        </div>
+        <span class="hint">例：隨加薪每年多投 3%</span>
+      </div>
+      <div class="field">
+        <label for="target">目標金額（選填，反推每月要投多少）</label>
+        <div class="input-wrap">
+          <input id="target" name="target" type="number" inputmode="numeric" min="0" step="100000" value="" placeholder="例：10000000" />
+          <span class="suffix">元</span>
+        </div>
+      </div>
+    </form>
+
+    <div id="results" aria-live="polite" style="margin-top:1.25rem"></div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem">
+      <button type="button" class="btn btn-ghost btn-sm" id="share">複製試算連結</button>
+    </div>
+  </section>
+
+  <Fragment slot="article">
+    <h2>定期定額為什麼有效</h2>
+    <p>
+      定期定額的核心不是「買在低點」，而是<strong>紀律</strong>與<strong>時間</strong>。固定金額在價格低時買到較多單位、價格高時買到較少，長期平均成本會被拉平；而複利讓前期的獲利繼續產生獲利，時間越長、曲線越陡。
+    </p>
+    <h2>本頁的計算方式</h2>
+    <p>
+      每月初投入，按月複利：本月資產 =（上月資產 + 本月投入）×（1 + 年化報酬率 ÷ 12）。年化報酬率是「平均」概念，真實市場每年高低起伏，結果只代表長期平均情境。
+    </p>
+    <h2>三個常見誤區</h2>
+    <ul>
+      <li><strong>高估報酬率</strong>：填 12%、15% 會得到漂亮的數字，但長期能穩定超過 10% 的資產非常少。</li>
+      <li><strong>忽略費用</strong>：基金 1.5% 經理費、ETF 0.3% 總費用率，20 年差距可達一成以上資產。</li>
+      <li><strong>中途停扣</strong>：市場大跌時停扣，剛好錯過最便宜的買點。</li>
+    </ul>
+    <h2>要從哪裡開始？</h2>
+    <p>
+      先用「目標金額」欄反推每月需要投入多少，再把這個金額設成薪轉戶的自動扣款。台灣多數券商定期定額門檻為 100 元或 1,000 元起，手續費多有折扣。
+      延伸閱讀：<a href="/guides/dca-compound-guide">定期定額複利完整指南</a>。
+    </p>
+  </Fragment>
+</CalculatorLayout>
+
+<script>
+  import { compound, monthlyForTarget, ruleOf72 } from '../../lib/finance.ts';
+  import { money, num, readNumber } from '../../lib/format.ts';
+  import { bindCalculator, setupShareButton } from '../../lib/urlstate.ts';
+  import { lineChart } from '../../lib/chart.ts';
+
+  const form = document.getElementById('calc') as HTMLFormElement;
+  const results = document.getElementById('results')!;
+  const $ = (id: string) => document.getElementById(id) as HTMLInputElement;
+
+  function compute() {
+    const initial = readNumber($('initial'), 0);
+    const monthly = readNumber($('monthly'), 0);
+    const rate = readNumber($('rate'), 7);
+    const years = Math.min(60, Math.max(1, readNumber($('years'), 20)));
+    const increase = readNumber($('increase'), 0);
+    const target = readNumber($('target'), 0);
+
+    const r = compound({ initial, monthly, annualReturnPct: rate, years, annualIncreasePct: increase });
+    const dbl = ruleOf72(rate);
+    const need = target > 0 ? monthlyForTarget(target, initial, rate, years) : NaN;
+
+    const labels = r.years.map((y) => `${y.year}年`);
+    const chart = lineChart(
+      labels,
+      [
+        { name: '資產總值', values: r.years.map((y) => y.value), color: 'var(--primary)' },
+        { name: '累計投入本金', values: r.years.map((y) => y.invested), color: 'var(--muted)', dashed: true },
+      ],
+      { title: '資產成長曲線' },
+    );
+    const rows = r.years
+      .map((y) => `<tr><td>第 ${y.year} 年</td><td>${num(y.invested)}</td><td>${num(y.value)}</td><td>${num(y.gain)}</td><td>${y.invested ? ((y.gain / y.invested) * 100).toFixed(0) : 0}%</td></tr>`)
+      .join('');
+
+    results.innerHTML = `
+      <div class="result-hero">
+        <span class="label">${years} 年後資產總值</span>
+        <span class="value">${money(r.finalValue)}</span>
+        <span class="sub">投入本金 ${money(r.totalInvested)}，獲利 ${money(r.totalGain)}（${r.totalInvested ? ((r.totalGain / r.totalInvested) * 100).toFixed(0) : 0}%）</span>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="k">年化報酬率</div><div class="v">${rate}%</div></div>
+        <div class="stat"><div class="k">資產翻倍約需</div><div class="v">${Number.isFinite(dbl) ? dbl.toFixed(1) + ' 年' : '—'}</div></div>
+        <div class="stat"><div class="k">獲利佔總資產</div><div class="v">${r.finalValue ? ((r.totalGain / r.finalValue) * 100).toFixed(0) : 0}%</div></div>
+        ${target > 0 ? `<div class="stat"><div class="k">達成 ${money(target)} 每月需投入</div><div class="v">${Number.isFinite(need) ? money(need) : '—'}</div></div>` : ''}
+      </div>
+      ${target > 0 && Number.isFinite(need) && need > monthly ? `<div class="notice" style="margin-top:1rem">以目前每月 ${money(monthly)} 無法在 ${years} 年內達標，需提高到每月 <strong>${money(need)}</strong>，或延長年限、提高報酬假設。</div>` : ''}
+      <div style="margin-top:1.25rem">${chart}</div>
+      <details style="margin-top:1rem">
+        <summary>查看逐年明細</summary>
+        <div class="table-wrap"><table>
+          <thead><tr><th>年度</th><th>累計投入</th><th>資產總值</th><th>累計獲利</th><th>報酬率</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+      </details>`;
+  }
+
+  bindCalculator(form, compute);
+  setupShareButton(document.getElementById('share') as HTMLButtonElement);
+</script>

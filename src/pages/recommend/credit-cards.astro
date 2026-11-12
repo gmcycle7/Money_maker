@@ -1,0 +1,56 @@
+---
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+import OfferList from '../../components/OfferList.astro';
+
+const faq = [
+  { q: '新手第一張信用卡怎麼選？', a: '先選「免年費、一般消費回饋 1% 以上、不用綁定複雜條件」的現金回饋卡，再依你最常花錢的地方（超商、網購、加油、行動支付）挑一張加碼卡。兩張卡就夠用，太多張反而管不好。' },
+  { q: '繳所得稅用信用卡划算嗎？', a: '多數銀行繳稅不計回饋，但每年 4–5 月常有「繳稅分期 0 利率」或「刷滿送刷卡金」活動，資金壓力大時值得用；也可以把繳稅額先拿去放高利活存賺利差。' },
+  { q: '辦卡會影響信用嗎？', a: '短期內密集申辦多張卡，聯徵查詢次數變多可能讓分數略降；正常使用、準時全額繳清則會累積良好信用，對之後申請房貸、信貸有幫助。' },
+  { q: '現金回饋和哩程卡怎麼選？', a: '年消費 30 萬以下、不常搭機：現金回饋最實在。每年出國 2 次以上、能彈性安排航班：哩程卡每元價值可能更高，但要花時間研究兌換。' },
+];
+---
+
+<ArticleLayout
+  title="信用卡推薦：怎麼挑最適合你的一張卡"
+  seoTitle="2026 信用卡推薦｜現金回饋、新戶、繳稅、行動支付怎麼選"
+  description="不是回饋最高就最好。用三個問題找出適合自己的信用卡類型，附上辦卡前的檢查清單與目前熱門辦卡活動。"
+  path="/recommend/credit-cards"
+  breadcrumb={[{ name: '精選推薦', href: '/recommend/credit-cards' }, { name: '信用卡推薦' }]}
+  published="2026-11-08"
+  updated="2026-11-08"
+  tools={['income-tax', 'loan']}
+  faq={faq}
+>
+  <h2>先回答三個問題</h2>
+  <ol>
+    <li><strong>每月刷卡多少？</strong> 2 萬以下：找免年費、無門檻 1%–2% 回饋。2–5 萬：可以考慮有「指定通路 3%–5%」的卡。5 萬以上：哩程或高端卡的年費可能回得來。</li>
+    <li><strong>錢主要花在哪？</strong> 網購、超商、加油、行動支付、海外——找對應通路加碼最高的卡，而不是看廣告的「最高 10%」。</li>
+    <li><strong>會不會全額繳清？</strong> 如果偶爾只繳最低應繳，循環利息 5%–15% 會吃掉所有回饋，這時「低利率」比「高回饋」重要。</li>
+  </ol>
+
+  <h2>辦卡前檢查清單</h2>
+  <ul>
+    <li>回饋有沒有<strong>上限</strong>（每月 300 元？500 元？）與<strong>門檻</strong>（需綁定帳戶、需登錄、需消費滿額）。</li>
+    <li>加碼活動<strong>到期日</strong>，到期後是否還值得留著。</li>
+    <li><strong>年費</strong>與免年費條件（刷滿幾次、綁定自動扣繳等）。</li>
+    <li>新戶禮是「<strong>核卡後 30 天內刷滿 N 元</strong>」還是「首刷即送」——條件差很多。</li>
+    <li>海外交易手續費（一般 1.5%）、是否有海外回饋補貼。</li>
+  </ul>
+
+  <h2>四種常見類型</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>類型</th><th>適合誰</th><th>要注意</th></tr></thead>
+      <tbody>
+        <tr><td>無腦現金回饋卡</td><td>不想研究、消費分散</td><td>回饋通常 1%–2%，部分需綁數位帳戶</td></tr>
+        <tr><td>通路加碼卡</td><td>某類消費特別集中</td><td>加碼有上限與期限，要定期檢查</td></tr>
+        <tr><td>行動支付／數位帳戶聯名卡</td><td>常用 LINE Pay、街口、全支付</td><td>需登錄、需綁定；回饋以點數形式發放</td></tr>
+        <tr><td>哩程卡</td><td>每年搭機 2 次以上</td><td>年費高，兌換要搶位</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <Fragment slot="after">
+    <OfferList category="creditCards" title="目前熱門辦卡活動" limit={12} />
+  </Fragment>
+</ArticleLayout>

@@ -1,0 +1,174 @@
+---
+import CalculatorLayout from '../../layouts/CalculatorLayout.astro';
+import { RATE_DEFAULTS } from '../../config/tw.ts';
+
+const faq = [
+  {
+    q: '信貸利率和「總費用年百分率（APR）」有什麼差別？',
+    a: '利率只算利息；總費用年百分率（APR）把開辦費、帳管費等一次性費用也換算進去，才是你真正的借款成本。金管會規定銀行必須揭露 APR。例如借 50 萬、利率 5%、5 年、開辦費 9,000 元，APR 約 5.8%，比名目利率高。',
+  },
+  {
+    q: '銀行廣告的「首期 0.01%」是真的嗎？',
+    a: '那是促銷利率，通常只有前 1–3 期，之後跳回一般利率。請一律用 APR 比較：2026 年各銀行信貸 APR 大約落在 2%–17%，差距主要來自個人信用條件。',
+  },
+  {
+    q: '信貸可以借多少？',
+    a: '依金管會規範，個人無擔保債務（信貸＋信用卡循環＋現金卡）總額不得超過月收入的 22 倍（DBR 22 倍）。月薪 5 萬，上限約 110 萬，實際額度還會依信用評分調整。',
+  },
+  {
+    q: '車貸利率為什麼比房貸高？',
+    a: '車子會折舊、擔保力比不動產弱，所以車貸利率通常 3%–8%，高於房貸的 2%–3%。另外車商常以「零利率」搭配較高車價或手續費，請用本頁把費用算進 APR 再比較。',
+  },
+];
+
+const sources = [
+  { name: '金管會銀行局｜銀行辦理消費性貸款總費用年百分率揭露', href: 'https://www.banking.gov.tw/' },
+  { name: '銀行公會｜DBR 22 倍規範', href: 'https://www.ba.org.tw/' },
+];
+---
+
+<CalculatorLayout slug="loan" faq={faq} updated="2026-11-08" sources={sources}>
+  <section class="card">
+    <form id="calc" class="form-grid" novalidate>
+      <div class="field">
+        <label for="type">貸款類型</label>
+        <div class="input-wrap">
+          <select id="type" name="type">
+            <option value="personal">信用貸款</option>
+            <option value="car">汽車貸款</option>
+            <option value="other">其他分期（裝潢、學貸…）</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="amount">貸款金額</label>
+        <div class="input-wrap">
+          <input id="amount" name="amount" type="number" inputmode="numeric" min="1000" step="10000" value="500000" />
+          <span class="suffix">元</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="months">期數</label>
+        <div class="input-wrap">
+          <input id="months" name="months" type="number" inputmode="numeric" min="1" max="120" step="1" value="60" />
+          <span class="suffix">個月</span>
+        </div>
+        <span class="hint">信貸最長 7 年（84 期）</span>
+      </div>
+      <div class="field">
+        <label for="rate">年利率</label>
+        <div class="input-wrap">
+          <input id="rate" name="rate" type="number" inputmode="decimal" min="0" max="30" step="0.01" value={RATE_DEFAULTS.personalLoan} />
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="fees">開辦費／手續費</label>
+        <div class="input-wrap">
+          <input id="fees" name="fees" type="number" inputmode="numeric" min="0" step="500" value="9000" />
+          <span class="suffix">元</span>
+        </div>
+        <span class="hint">一次性費用，會計入 APR</span>
+      </div>
+      <div class="field">
+        <label for="income">月收入（選填）</label>
+        <div class="input-wrap">
+          <input id="income" name="income" type="number" inputmode="numeric" min="0" step="1000" value="" placeholder="用來算 DBR 22 倍上限" />
+          <span class="suffix">元</span>
+        </div>
+      </div>
+    </form>
+
+    <div id="results" aria-live="polite" style="margin-top:1.25rem"></div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem">
+      <button type="button" class="btn btn-ghost btn-sm" id="share">複製試算連結</button>
+      <a class="btn btn-ghost btn-sm" href="/tools/mortgage">改算房貸 →</a>
+    </div>
+  </section>
+
+  <Fragment slot="article">
+    <h2>看懂信貸：月付金只是開始</h2>
+    <p>
+      信貸廣告通常只強調「利率 X% 起」和「月付多少」，但真正的成本要看<strong>總費用年百分率（APR）</strong>：它把開辦費、帳管費與利息一起換算成年化成本。
+      本頁用內部報酬率（IRR）法反推 APR，和金管會要求銀行揭露的算法一致。
+    </p>
+    <h2>APR 怎麼算</h2>
+    <p>
+      把「實拿金額」（貸款金額 − 開辦費）當成現值，把每期月付金當成現金流出，找出讓淨現值等於零的年利率，就是 APR。費用越高、期數越短，APR 和名目利率的差距越大。
+    </p>
+    <h2>比較貸款的三步驟</h2>
+    <ol>
+      <li><strong>同樣金額、同樣期數</strong>比 APR，不比「起」利率。</li>
+      <li>確認<strong>提前清償違約金</strong>（常見綁約 1 年，違約金 3–4%）。</li>
+      <li>檢查<strong>DBR 22 倍</strong>：所有無擔保債務不能超過月收入 22 倍，超過就會被婉拒。</li>
+    </ol>
+    <h2>什麼時候不該借信貸</h2>
+    <p>
+      用信貸投資高風險商品、或是用信貸繳信用卡最低應繳金額，都是常見的財務陷阱。信貸適合有明確還款來源、且替代方案（信用卡分期、循環利息 15%）成本更高的情況。
+    </p>
+  </Fragment>
+</CalculatorLayout>
+
+<script>
+  import { pmt, loanApr, amortization } from '../../lib/finance.ts';
+  import { money, num, readNumber } from '../../lib/format.ts';
+  import { bindCalculator, setupShareButton } from '../../lib/urlstate.ts';
+
+  const form = document.getElementById('calc') as HTMLFormElement;
+  const results = document.getElementById('results')!;
+  const $ = (id: string) => document.getElementById(id) as HTMLInputElement;
+
+  function compute() {
+    const principal = readNumber($('amount'), 0);
+    const months = Math.min(360, Math.max(1, readNumber($('months'), 60)));
+    const rate = readNumber($('rate'), 4.5);
+    const fees = readNumber($('fees'), 0);
+    const income = readNumber($('income'), 0);
+    if (principal <= 0) {
+      results.innerHTML = '<p class="muted">請輸入貸款金額。</p>';
+      return;
+    }
+    const payment = pmt(principal, rate, months);
+    const apr = loanApr(principal, rate, months, fees);
+    const total = payment * months;
+    const interest = total - principal;
+    const r = amortization({ principal, years: months / 12, annualRatePct: rate });
+    const rows = r.rows
+      .filter((_row, i) => i < 12 || (i + 1) % 12 === 0 || i === r.rows.length - 1)
+      .map((row) => `<tr><td>第 ${row.month} 期</td><td>${num(row.payment)}</td><td>${num(row.principal)}</td><td>${num(row.interest)}</td><td>${num(row.balance)}</td></tr>`)
+      .join('');
+
+    const dbr = income > 0 ? income * 22 : 0;
+    const dbrNote =
+      income > 0
+        ? principal > dbr
+          ? `<div class="notice danger" style="margin-top:1rem">依 DBR 22 倍規範，月收入 ${money(income)} 的無擔保借款上限約 <strong>${money(dbr)}</strong>，本筆已超過，銀行通常不會核貸。</div>`
+          : `<div class="notice" style="margin-top:1rem">DBR 22 倍上限約 <strong>${money(dbr)}</strong>（含信用卡循環與其他信貸），本筆佔 ${((principal / dbr) * 100).toFixed(0)}%。月付佔月收入 ${((payment / income) * 100).toFixed(1)}%${payment / income > 0.4 ? '，已偏高，請審慎評估' : ''}。</div>`
+        : '';
+
+    results.innerHTML = `
+      <div class="result-hero">
+        <span class="label">每月應繳</span>
+        <span class="value">${money(payment)}</span>
+        <span class="sub">${months} 期，名目年利率 ${rate}%</span>
+      </div>
+      <div class="stats">
+        <div class="stat ${apr - rate > 1 ? 'warn' : ''}"><div class="k">總費用年百分率 APR</div><div class="v">${Number.isFinite(apr) ? apr.toFixed(2) + '%' : '—'}</div></div>
+        <div class="stat"><div class="k">總利息</div><div class="v">${money(interest)}</div></div>
+        <div class="stat"><div class="k">利息＋費用</div><div class="v">${money(interest + fees)}</div></div>
+        <div class="stat"><div class="k">實拿金額</div><div class="v">${money(principal - fees)}</div></div>
+      </div>
+      ${fees > 0 ? `<div class="notice" style="margin-top:1rem">開辦費 ${money(fees)} 讓實際成本從 ${rate}% 變成 <strong>${apr.toFixed(2)}%</strong>。比較不同銀行時請用 APR。</div>` : ''}
+      ${dbrNote}
+      <details style="margin-top:1rem">
+        <summary>查看攤還表（前 12 期＋每年年底）</summary>
+        <div class="table-wrap"><table>
+          <thead><tr><th>期數</th><th>月付金</th><th>本金</th><th>利息</th><th>剩餘本金</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+      </details>`;
+  }
+
+  bindCalculator(form, compute);
+  setupShareButton(document.getElementById('share') as HTMLButtonElement);
+</script>

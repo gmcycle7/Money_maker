@@ -1,0 +1,98 @@
+---
+import Base from '../layouts/Base.astro';
+import ToolCard from '../components/ToolCard.astro';
+import OfferList from '../components/OfferList.astro';
+import AdSlot from '../components/AdSlot.astro';
+import { SITE } from '../config/site.ts';
+import { TOOLS } from '../lib/tools.ts';
+import { getCollection } from 'astro:content';
+
+const guides = (await getCollection('guides', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime())
+  .slice(0, 6);
+---
+
+<Base title={`${SITE.name}｜${SITE.tagline}`} description={SITE.description} path="/" bareTitle>
+  <section class="hero container">
+    <span class="eyebrow">免費 · 免登入 · 手機也好用</span>
+    <h1>算清楚每一塊錢，<br />再做決定。</h1>
+    <p class="lead">
+      房貸、信貸、所得稅、加班費、勞退、定期定額——台灣人最常用的 {TOOLS.length} 個理財計算機，
+      依最新法規與官方參數更新，輸入數字馬上看結果。
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="/tools/mortgage">🏠 房貸試算</a>
+      <a class="btn btn-ghost" href="/tools/income-tax">🧾 所得稅試算</a>
+      <a class="btn btn-ghost" href="/tools">所有工具 →</a>
+    </div>
+  </section>
+
+  <div class="container">
+    <AdSlot slot="headerBanner" format="horizontal" label="首頁橫幅" />
+
+    <section class="section" aria-labelledby="tools-h">
+      <div class="section-head">
+        <h2 id="tools-h">試算工具</h2>
+        <a href="/tools">全部 →</a>
+      </div>
+      <div class="tool-grid">
+        {TOOLS.map((t) => <ToolCard tool={t} />)}
+      </div>
+    </section>
+
+    <section class="section features">
+      <div class="card">
+        <h3>📌 參數跟著法規走</h3>
+        <p class="muted">所得稅免稅額、級距、基本工資、青安利率等參數集中管理，每年 1 月與 5 月對照官方公告更新，並標註資料來源。</p>
+      </div>
+      <div class="card">
+        <h3>🔒 資料不離開你的手機</h3>
+        <p class="muted">所有計算都在瀏覽器內完成，不會上傳任何收入、貸款資料；試算連結可直接分享給家人或代書。</p>
+      </div>
+      <div class="card">
+        <h3>📖 看得懂的說明</h3>
+        <p class="muted">每個工具都附公式、範例與常見問題，告訴你數字怎麼來、哪裡要注意，不只是給你一個答案。</p>
+      </div>
+    </section>
+
+    {
+      guides.length > 0 && (
+        <section class="section" aria-labelledby="guides-h">
+          <div class="section-head">
+            <h2 id="guides-h">理財指南</h2>
+            <a href="/guides">全部文章 →</a>
+          </div>
+          <div class="article-list">
+            {guides.map((g) => (
+              <a class="article-card" href={`/guides/${g.id}`}>
+                <h3>{g.data.title}</h3>
+                <p>{g.data.description}</p>
+                <span class="meta">{(g.data.updatedDate ?? g.data.pubDate).toISOString().slice(0, 10)}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    <section class="section">
+      <OfferList category="creditCards" title="精選信用卡辦卡優惠" limit={3} />
+    </section>
+
+    <AdSlot slot="footer" format="horizontal" label="首頁底部" />
+  </div>
+</Base>
+
+<style>
+  .features {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+  .features .card + .card {
+    margin-top: 0;
+  }
+  .features h3 {
+    margin-top: 0;
+  }
+</style>

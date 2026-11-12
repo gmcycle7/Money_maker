@@ -1,0 +1,173 @@
+---
+import CalculatorLayout from '../../layouts/CalculatorLayout.astro';
+import { PENSION } from '../../config/tw.ts';
+
+const faq = [
+  {
+    q: '勞退新制雇主每月提撥多少？',
+    a: '雇主必須依「月提繳工資分級表」為勞工提撥不低於 6% 到個人勞退專戶，上限級距為 150,000 元（每月最多 9,000 元）。這筆錢是雇主額外負擔，不會從你薪水扣。',
+  },
+  {
+    q: '勞退自提 6% 划算嗎？',
+    a: '自提金額不計入當年度薪資所得，等於立刻省下「自提金額 × 你的邊際稅率」的稅；每年免稅上限 108,000 元。加上勞退基金有兩年期定存利率的保證收益，對適用稅率 12% 以上的人通常划算；缺點是 60 歲前不能動用。',
+  },
+  {
+    q: '勞退新制退休金什麼時候可以領？一次領還是月領？',
+    a: '年滿 60 歲即可請領，與是否離職無關。工作年資滿 15 年可選擇月退或一次領；未滿 15 年只能一次領。月領金額依專戶餘額、年金生命表與保證利率計算。',
+  },
+  {
+    q: '勞退和勞保老年給付有什麼不同？',
+    a: '勞退新制是雇主提撥到你的個人專戶，錢是你的，不受勞保財務影響；勞保老年給付是社會保險，依投保薪資與年資計算，由勞保基金支付。退休後兩筆都可以領。',
+  },
+];
+
+const sources = [
+  { name: '勞動部勞工保險局｜勞工退休金新制', href: 'https://www.bli.gov.tw/' },
+  { name: '勞保局｜勞工退休金月提繳分級表', href: 'https://www.bli.gov.tw/0013083.html' },
+  { name: '勞動部｜勞工自願提繳退休金免稅說明', href: 'https://www.mol.gov.tw/' },
+];
+---
+
+<CalculatorLayout slug="pension" faq={faq} updated="2026-11-08" sources={sources}>
+  <section class="card">
+    <form id="calc" class="form-grid" novalidate>
+      <div class="field">
+        <label for="salary">目前月薪</label>
+        <div class="input-wrap">
+          <input id="salary" name="salary" type="number" inputmode="numeric" min="0" step="1000" value="45000" />
+          <span class="suffix">元</span>
+        </div>
+        <span class="hint">提繳工資上限 {PENSION.maxInsuredSalary.toLocaleString()} 元</span>
+      </div>
+      <div class="field">
+        <label for="voluntary">自提比例</label>
+        <div class="input-wrap">
+          <input id="voluntary" name="voluntary" type="number" inputmode="decimal" min="0" max="6" step="1" value="6" />
+          <span class="suffix">%</span>
+        </div>
+        <span class="hint">0–6%，雇主固定 6%</span>
+      </div>
+      <div class="field">
+        <label for="age">目前年齡</label>
+        <div class="input-wrap">
+          <input id="age" name="age" type="number" inputmode="numeric" min="15" max="64" step="1" value="30" />
+          <span class="suffix">歲</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="retire">預計請領年齡</label>
+        <div class="input-wrap">
+          <input id="retire" name="retire" type="number" inputmode="numeric" min="60" max="75" step="1" value="65" />
+          <span class="suffix">歲</span>
+        </div>
+        <span class="hint">法定最早 60 歲</span>
+      </div>
+      <div class="field">
+        <label for="return">基金預估年化報酬</label>
+        <div class="input-wrap">
+          <input id="return" name="return" type="number" inputmode="decimal" min="0" max="15" step="0.1" value="4" />
+          <span class="suffix">%</span>
+        </div>
+        <span class="hint">勞退基金近十年平均約 4%–6%，保證最低為 2 年定存利率</span>
+      </div>
+      <div class="field">
+        <label for="growth">每年薪資成長</label>
+        <div class="input-wrap">
+          <input id="growth" name="growth" type="number" inputmode="decimal" min="0" max="20" step="0.5" value="2" />
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="tax">你的所得稅邊際稅率</label>
+        <div class="input-wrap">
+          <select id="tax" name="tax">
+            <option value="0">0%（免稅）</option>
+            <option value="5" selected>5%</option>
+            <option value="12">12%</option>
+            <option value="20">20%</option>
+            <option value="30">30%</option>
+            <option value="40">40%</option>
+          </select>
+        </div>
+        <span class="hint">不確定？用 <a href="/tools/income-tax">所得稅試算</a> 查</span>
+      </div>
+    </form>
+
+    <div id="results" aria-live="polite" style="margin-top:1.25rem"></div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem">
+      <button type="button" class="btn btn-ghost btn-sm" id="share">複製試算連結</button>
+    </div>
+  </section>
+
+  <Fragment slot="article">
+    <h2>勞退新制怎麼運作</h2>
+    <p>
+      2005 年 7 月後到職的勞工適用新制：雇主每月提撥月提繳工資的 6% 到你的個人專戶，你可以再自提 0–6%。專戶由勞動基金運用局投資，收益保證不低於兩年期定存利率，不足由國庫補足。
+    </p>
+    <h2>自提 6% 的節稅效果</h2>
+    <p>
+      自提金額從當年度薪資所得中扣除。月薪 6 萬、自提 6%（每月 3,600 元、每年 43,200 元）、適用稅率 12%，每年省稅 5,184 元，等於自提部分立刻有 12% 的「無風險報酬」。
+      所得越高省越多，上限為每年 108,000 元。領回時才會併入退休所得課稅，但退休後通常所得較低、稅率也較低。
+    </p>
+    <h2>本頁的估算方式</h2>
+    <ul>
+      <li>每月提撥 = min(月薪, 150,000) × 比例；薪資依你填的成長率每年調升。</li>
+      <li>專戶餘額按月複利成長；請領時的月退金以保證利率 {(PENSION.guaranteedRate * 100).toFixed(2)}%、{PENSION.annuityYears} 年年金估算（實際依勞保局年金生命表）。</li>
+      <li>未考慮通膨：30 年後的 1,000 萬購買力約為今天的 500–550 萬（通膨 2%）。</li>
+    </ul>
+    <h2>退休金三層架構</h2>
+    <p>
+      第一層勞保老年給付、第二層勞退新制、第三層自己的投資（定期定額、儲蓄險等）。一般建議退休後所得替代率要達 70%，光靠前兩層通常只有 40%–50%，剩下的要靠第三層補足。
+      用 <a href="/tools/compound">定期定額複利試算</a> 算算第三層需要每月投多少。
+    </p>
+  </Fragment>
+</CalculatorLayout>
+
+<script>
+  import { pensionProjection } from '../../lib/finance.ts';
+  import { money, num, wan, readNumber } from '../../lib/format.ts';
+  import { bindCalculator, setupShareButton } from '../../lib/urlstate.ts';
+
+  const form = document.getElementById('calc') as HTMLFormElement;
+  const results = document.getElementById('results')!;
+  const $ = (id: string) => document.getElementById(id) as HTMLInputElement | HTMLSelectElement;
+
+  function compute() {
+    const salary = readNumber($('salary'), 0);
+    const age = readNumber($('age'), 30);
+    const retire = Math.max(age + 1, readNumber($('retire'), 65));
+    const r = pensionProjection({
+      monthlySalary: salary,
+      voluntaryRatePct: readNumber($('voluntary'), 0),
+      currentAge: age,
+      retirementAge: retire,
+      annualReturnPct: readNumber($('return'), 4),
+      salaryGrowthPct: readNumber($('growth'), 0),
+      marginalTaxRatePct: readNumber($('tax'), 5),
+    });
+    if (salary <= 0) {
+      results.innerHTML = '<p class="muted">請輸入月薪。</p>';
+      return;
+    }
+    const contributed = r.employerTotalContributed + r.voluntaryTotalContributed;
+    results.innerHTML = `
+      <div class="result-hero">
+        <span class="label">${retire} 歲時預估專戶餘額</span>
+        <span class="value">${money(r.totalFund)}</span>
+        <span class="sub">約 ${wan(r.totalFund)}，其中雇主提撥累積 ${wan(r.employerFund)}、自提累積 ${wan(r.voluntaryFund)}</span>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="k">預估月退休金</div><div class="v">${money(r.monthlyPension)}</div></div>
+        <div class="stat"><div class="k">雇主每月提撥</div><div class="v">${money(r.employerMonthly)}</div></div>
+        <div class="stat"><div class="k">自己每月自提</div><div class="v">${money(r.voluntaryMonthly)}</div></div>
+        <div class="stat"><div class="k">累積提撥本金</div><div class="v">${money(contributed)}</div></div>
+        <div class="stat"><div class="k">投資收益</div><div class="v">${money(r.totalFund - contributed)}</div></div>
+        <div class="stat"><div class="k">自提第一年節稅</div><div class="v">${money(r.firstYearTaxSaving)}</div></div>
+      </div>
+      ${r.voluntaryMonthly > 0 ? `<div class="notice" style="margin-top:1rem">自提 ${num(readNumber($('voluntary')))}% 期間累計約可省稅 <strong>${money(r.totalTaxSaving)}</strong>（以目前邊際稅率估）。</div>` : `<div class="notice" style="margin-top:1rem">你目前沒有自提。若改為自提 6%，每月 ${money(Math.min(salary, 150000) * 0.06)}、第一年約可省稅 ${money(Math.min(salary, 150000) * 0.06 * 12 * (readNumber($('tax'), 5) / 100))}。</div>`}
+      <p class="muted" style="margin-top:1rem;font-size:.85rem">提繳 ${r.years} 年。月退金以保證利率與 24 年年金估算，實際金額依勞保局公式計算；本試算未含勞保老年給付。</p>`;
+  }
+
+  bindCalculator(form, compute);
+  setupShareButton(document.getElementById('share') as HTMLButtonElement);
+</script>

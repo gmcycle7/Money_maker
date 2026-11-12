@@ -1,0 +1,16 @@
+---
+import Base from '../layouts/Base.astro';
+import ToolCard from '../components/ToolCard.astro';
+import { TOOLS } from '../lib/tools.ts';
+---
+
+<Base title="找不到頁面" description="這個頁面不存在或已搬家。" path="/404" noindex>
+  <div class="container" style="text-align:center;padding:3rem 0">
+    <h1>404：這頁算不出來</h1>
+    <p class="lead" style="margin:0 auto 1.5rem">網址可能打錯了，或是這個頁面已經搬家。試試下面這些常用工具：</p>
+    <div class="tool-grid" style="text-align:left">
+      {TOOLS.slice(0, 3).map((t) => <ToolCard tool={t} />)}
+    </div>
+    <p style="margin-top:2rem"><a class="btn btn-primary" href="/">回到首頁</a></p>
+  </div>
+</Base>

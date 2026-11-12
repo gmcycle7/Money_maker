@@ -1,0 +1,27 @@
+---
+import { getCollection, render } from 'astro:content';
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+
+export async function getStaticPaths() {
+  const guides = await getCollection('guides', ({ data }) => !data.draft);
+  return guides.map((g) => ({ params: { slug: g.id }, props: { entry: g } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+const fmt = (x: Date) => x.toISOString().slice(0, 10);
+---
+
+<ArticleLayout
+  title={d.title}
+  description={d.description}
+  path={`/guides/${entry.id}`}
+  breadcrumb={[{ name: '理財指南', href: '/guides' }, { name: d.title }]}
+  published={fmt(d.pubDate)}
+  updated={d.updatedDate ? fmt(d.updatedDate) : undefined}
+  offers={d.offers}
+  tools={d.tools}
+>
+  <Content />
+</ArticleLayout>

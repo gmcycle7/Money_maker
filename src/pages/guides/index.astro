@@ -1,0 +1,35 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { getCollection } from 'astro:content';
+
+const guides = (await getCollection('guides', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+);
+---
+
+<Base title="理財指南" description="房貸、報稅、加班費、勞退、定期定額的白話教學：公式、範例、常見錯誤與節稅方法，每篇都附上可直接試算的工具。" path="/guides">
+  <div class="container">
+    <Breadcrumb items={[{ name: '理財指南' }]} />
+    <header class="page-head">
+      <h1>理財指南</h1>
+      <p class="lead">用白話講清楚規則與公式，每篇都附上可以直接動手算的工具。</p>
+    </header>
+    <div class="article-list">
+      {
+        guides.map((g) => (
+          <a class="article-card" href={`/guides/${g.id}`}>
+            <h3>{g.data.title}</h3>
+            <p>{g.data.description}</p>
+            <span class="meta">
+              {(g.data.updatedDate ?? g.data.pubDate).toISOString().slice(0, 10)}
+              {g.data.tags.length > 0 && <> · {g.data.tags.join('、')}</>}
+            </span>
+          </a>
+        ))
+      }
+    </div>
+    <AdSlot slot="footer" format="horizontal" label="底部橫幅" />
+  </div>
+</Base>

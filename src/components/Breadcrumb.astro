@@ -1,0 +1,27 @@
+---
+import { SITE } from '../config/site.ts';
+
+interface Props {
+  items: { name: string; href?: string }[];
+}
+const { items } = Astro.props;
+const siteUrl = (Astro.site ?? new URL(SITE.url)).toString().replace(/\/$/, '');
+const all = [{ name: '首頁', href: '/' }, ...items];
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: all.map((it, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: it.name,
+    ...(it.href ? { item: `${siteUrl}${it.href === '/' ? '' : it.href}` } : {}),
+  })),
+};
+---
+
+<nav class="breadcrumb" aria-label="麵包屑">
+  <ol>
+    {all.map((it, i) => <li>{it.href && i < all.length - 1 ? <a href={it.href}>{it.name}</a> : <span aria-current="page">{it.name}</span>}</li>)}
+  </ol>
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} />
+</nav>

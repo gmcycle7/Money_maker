@@ -1,0 +1,19 @@
+---
+import { relatedTools } from '../lib/tools.ts';
+import ToolCard from './ToolCard.astro';
+
+interface Props {
+  slug: string;
+  title?: string;
+  n?: number;
+}
+const { slug, title = '你可能也需要', n = 3 } = Astro.props;
+const tools = relatedTools(slug, n);
+---
+
+<section class="related" aria-label={title}>
+  <h2>{title}</h2>
+  <div class="tool-grid">
+    {tools.map((t) => <ToolCard tool={t} />)}
+  </div>
+</section>

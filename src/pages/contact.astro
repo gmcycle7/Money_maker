@@ -1,0 +1,26 @@
+---
+import ArticleLayout from '../layouts/ArticleLayout.astro';
+import { SITE } from '../config/site.ts';
+---
+
+<ArticleLayout
+  title="聯絡我們"
+  description={`有任何問題、錯誤回報或合作需求，歡迎與${SITE.name}聯絡。`}
+  path="/contact"
+  breadcrumb={[{ name: '聯絡我們' }]}
+  sidebar={false}
+  type="website"
+>
+  <h2>Email</h2>
+  <p>
+    <a class="btn btn-primary" href={`mailto:${SITE.contactEmail}?subject=${encodeURIComponent(`[${SITE.name}] 聯絡`)}`}>{SITE.contactEmail}</a>
+  </p>
+  <h2>我們特別歡迎</h2>
+  <ul>
+    <li><strong>錯誤回報</strong>：請附上工具名稱、你輸入的數字與你認為正確的結果。</li>
+    <li><strong>法規更新提醒</strong>：若你發現免稅額、利率、基本工資等有新公告而本站尚未更新。</li>
+    <li><strong>功能建議</strong>：你希望多哪個計算機？</li>
+    <li><strong>企業需求</strong>：人資多人加班費批次計算、房仲／代書白標試算工具等合作。</li>
+  </ul>
+  <p class="muted">本站不提供個別理財諮詢服務，無法回覆「我該不該買／該不該借」等問題。</p>
+</ArticleLayout>

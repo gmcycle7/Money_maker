@@ -1,0 +1,54 @@
+---
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+import OfferList from '../../components/OfferList.astro';
+
+const faq = [
+  { q: '信貸申請會查聯徵嗎？多久可以撥款？', a: '會。銀行會調閱聯徵報告評估信用。線上申辦最快當天核貸、1–3 個工作天撥款。短期內向多家銀行申請會留下多筆查詢紀錄，建議先比較、再集中申請 1–2 家。' },
+  { q: '利率 2% 起是真的嗎？', a: '「起」代表最優條件客戶才拿得到，多數人的利率在 4%–10%。比較時請用「總費用年百分率（APR）」，它把開辦費也算進去，才是真正成本。' },
+  { q: '可以提前還款嗎？', a: '可以，但多數方案綁約 1 年，期間提前清償會收違約金（常見為剩餘本金 3%–4%，或固定金額）。若你計畫 1 年內還清，選無綁約方案更划算。' },
+  { q: '信用卡分期和信貸哪個划算？', a: '信用卡分期年利率多在 5%–15%、循環利息最高 15%；信用良好者信貸 APR 可能 3%–6%。金額 10 萬以上、期數 1 年以上，信貸通常較便宜。' },
+];
+---
+
+<ArticleLayout
+  title="貸款方案比較：信貸、車貸、整合負債怎麼選"
+  seoTitle="2026 信貸比較｜總費用年百分率、DBR 22 倍、線上申辦流程"
+  description="用 APR 而不是廣告利率比較貸款，確認 DBR 22 倍額度、綁約與違約金，再決定申請哪一家。"
+  path="/recommend/loans"
+  breadcrumb={[{ name: '精選推薦', href: '/recommend/credit-cards' }, { name: '貸款方案比較' }]}
+  published="2026-11-08"
+  updated="2026-11-08"
+  tools={['loan', 'mortgage']}
+  faq={faq}
+>
+  <h2>比較貸款只看一個數字：APR</h2>
+  <p>
+    總費用年百分率（APR）把利息、開辦費、帳管費全部換算成年化成本，是金管會要求銀行揭露的標準指標。
+    兩個方案利率一樣，開辦費差 5,000 元，APR 可能差 1% 以上。先用 <a href="/tools/loan">信貸試算</a> 把你的條件算成 APR 再比。
+  </p>
+
+  <h2>申請前的四個確認</h2>
+  <ol>
+    <li><strong>DBR 22 倍</strong>：所有無擔保債務（信貸、卡循環、現金卡）合計不得超過月收入 22 倍。</li>
+    <li><strong>綁約期與違約金</strong>：常見綁約 1 年；提前清償違約金 3%–4%。</li>
+    <li><strong>撥款前費用</strong>：合法銀行不會在撥款前收「保證金」「手續費」，要你先匯款的都是詐騙。</li>
+    <li><strong>還款來源</strong>：月付不要超過月收入 30%；用信貸投資高風險商品是最常見的財務災難。</li>
+  </ol>
+
+  <h2>三種常見情境</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>情境</th><th>合適方案</th><th>提醒</th></tr></thead>
+      <tbody>
+        <tr><td>整合卡債（循環利息 15%）</td><td>信貸整合負債</td><td>APR 低於 10% 就有感；整合後要剪卡避免再刷</td></tr>
+        <tr><td>買車</td><td>車商分期 vs 銀行車貸</td><td>「零利率」常搭配較高車價，用 APR 算總成本</td></tr>
+        <tr><td>裝潢、進修、醫療</td><td>信貸</td><td>金額確定、期數短的情況，選無綁約方案</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">本頁為一般資訊，實際核貸條件以各銀行審核為準。借款前請審慎評估自身還款能力。</p>
+
+  <Fragment slot="after">
+    <OfferList category="loans" title="目前貸款方案參考" limit={12} />
+  </Fragment>
+</ArticleLayout>

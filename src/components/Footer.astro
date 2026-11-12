@@ -1,0 +1,45 @@
+---
+import { SITE, MONETIZATION } from '../config/site.ts';
+import { TOOLS } from '../lib/tools.ts';
+const year = new Date().getFullYear();
+const yearText = year > SITE.foundedYear ? `${SITE.foundedYear}–${year}` : `${year}`;
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-cols">
+      <div>
+        <h4>試算工具</h4>
+        <ul>
+          {TOOLS.map((t) => <li><a href={`/tools/${t.slug}`}>{t.title}</a></li>)}
+        </ul>
+      </div>
+      <div>
+        <h4>精選推薦</h4>
+        <ul>
+          <li><a href="/recommend/credit-cards">信用卡推薦</a></li>
+          <li><a href="/recommend/brokers">證券開戶推薦</a></li>
+          <li><a href="/recommend/loans">貸款方案比較</a></li>
+          <li><a href="/guides">理財指南</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>關於本站</h4>
+        <ul>
+          <li><a href="/about">關於我們</a></li>
+          <li><a href="/contact">聯絡我們</a></li>
+          <li><a href="/privacy">隱私權政策</a></li>
+          <li><a href="/disclaimer">免責聲明與揭露</a></li>
+          {MONETIZATION.donateUrl && <li><a href={MONETIZATION.donateUrl} rel="noopener" target="_blank">請我們喝杯咖啡 ☕</a></li>}
+        </ul>
+      </div>
+    </div>
+    <div class="footer-legal">
+      <p>
+        本站所有試算結果僅供參考，實際金額以銀行、國稅局、勞動部等主管機關核定為準。本站內容為一般資訊與教育用途，非投資、保險、稅務或法律建議，投資有風險，請自行判斷或洽合法持牌業者。
+        本站部分頁面含聯盟行銷連結，透過連結申辦或購買，本站可能獲得分潤，不影響您的價格；內容為作者獨立意見。
+      </p>
+      <p>© {yearText} {SITE.name} {SITE.nameEn}. All rights reserved.</p>
+    </div>
+  </div>
+</footer>

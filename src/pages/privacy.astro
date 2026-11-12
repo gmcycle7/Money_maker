@@ -1,0 +1,48 @@
+---
+import ArticleLayout from '../layouts/ArticleLayout.astro';
+import { SITE } from '../config/site.ts';
+---
+
+<ArticleLayout
+  title="隱私權政策"
+  description={`${SITE.name}如何蒐集、使用與保護您的資料，以及 Cookie、Google 廣告與分析工具的使用說明。`}
+  path="/privacy"
+  breadcrumb={[{ name: '隱私權政策' }]}
+  sidebar={false}
+  type="website"
+  updated="2026-11-08"
+>
+  <h2>一、適用範圍</h2>
+  <p>本政策適用於您瀏覽 {SITE.name}（以下稱「本站」）時所涉及的個人資料蒐集、處理與利用。依《個人資料保護法》第 8 條，本站於此向您告知相關事項。</p>
+
+  <h2>二、我們蒐集什麼</h2>
+  <ul>
+    <li><strong>試算資料不會被蒐集</strong>：您在各計算機輸入的收入、貸款、家庭狀況等資料，全部在您的瀏覽器內計算，不會傳送到本站伺服器。</li>
+    <li><strong>瀏覽紀錄</strong>：本站使用 Google Analytics 4 等分析工具，蒐集匿名化的瀏覽資訊（造訪頁面、停留時間、裝置類型、概略地區），用於改善網站內容。IP 位址採匿名化處理。</li>
+    <li><strong>來信資料</strong>：您主動寄信聯絡時提供的姓名與 Email，僅用於回覆您的問題，不會用於行銷。</li>
+  </ul>
+
+  <h2>三、Cookie 與第三方廣告</h2>
+  <p>
+    本站使用 Google AdSense 投放廣告。Google 及其合作夥伴會使用 Cookie（包含 DoubleClick Cookie）依據您先前造訪本站或其他網站的紀錄顯示廣告。
+    您可以前往 <a href="https://adssettings.google.com/" target="_blank" rel="noopener">Google 廣告設定</a> 停用個人化廣告，或至
+    <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener">www.aboutads.info</a> 選擇退出第三方供應商的個人化廣告 Cookie。
+    Google 如何使用資料請參閱 <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">Google 隱私權與條款</a>。
+  </p>
+  <p>本站亦使用 localStorage 儲存您選擇的深色／淺色主題，此資料僅存於您的裝置。</p>
+
+  <h2>四、聯盟行銷連結</h2>
+  <p>本站部分頁面含聯盟行銷連結（例如聯盟網 Affiliates.One、通路王 iChannels 等平台）。點擊這些連結時，聯盟平台可能透過 Cookie 記錄點擊來源以計算分潤；相關資料處理依各平台之隱私權政策辦理。</p>
+
+  <h2>五、資料利用期間、地區與對象</h2>
+  <p>分析資料由 Google 依其資料保留政策（預設 14 個月）保存於其全球伺服器；來信資料保存至問題處理完畢後 1 年內刪除。本站不會將您的個人資料出售或提供給與上述目的無關的第三方。</p>
+
+  <h2>六、您的權利</h2>
+  <p>依個資法第 3 條，您可就本站持有之您的個人資料請求查詢、閱覽、複製、補充、更正、停止蒐集處理利用或刪除。請來信 <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>，我們將於 15 日內回覆。</p>
+
+  <h2>七、外部連結</h2>
+  <p>本站連結至銀行、政府機關與其他網站時，該等網站有各自的隱私權政策，本站不負連帶責任。</p>
+
+  <h2>八、政策修訂</h2>
+  <p>本政策如有修訂，將公布於本頁並更新日期。</p>
+</ArticleLayout>

@@ -1,0 +1,121 @@
+---
+/**
+ * 文章／推薦頁／靜態頁共用版面。
+ * sidebar=true 時右側顯示聯盟商品與廣告；false 為單欄（隱私權等法務頁）。
+ */
+import Base from './Base.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import AdSlot from '../components/AdSlot.astro';
+import OfferList from '../components/OfferList.astro';
+import ToolCard from '../components/ToolCard.astro';
+import Faq, { type FaqItem } from '../components/Faq.astro';
+import { SITE, type OfferCategory } from '../config/site.ts';
+import { getTool } from '../lib/tools.ts';
+
+interface Props {
+  title: string;
+  seoTitle?: string;
+  description: string;
+  path: string;
+  breadcrumb: { name: string; href?: string }[];
+  published?: string;
+  updated?: string;
+  offers?: OfferCategory;
+  /** 要在文末推薦的工具 slug */
+  tools?: string[];
+  sidebar?: boolean;
+  faq?: FaqItem[];
+  type?: 'article' | 'website';
+  noindex?: boolean;
+  /** 文章作者（E-E-A-T） */
+  author?: string;
+}
+
+const {
+  title,
+  seoTitle = title,
+  description,
+  path,
+  breadcrumb,
+  published,
+  updated,
+  offers,
+  tools = [],
+  sidebar = true,
+  faq = [],
+  type = 'article',
+  noindex = false,
+  author = `${SITE.name} 編輯部`,
+} = Astro.props;
+
+const siteUrl = (Astro.site ?? new URL(SITE.url)).toString().replace(/\/$/, '');
+const ld =
+  type === 'article'
+    ? [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: title,
+          description,
+          inLanguage: 'zh-TW',
+          mainEntityOfPage: `${siteUrl}${path}`,
+          author: { '@type': 'Organization', name: author },
+          publisher: { '@type': 'Organization', name: SITE.name, logo: { '@type': 'ImageObject', url: `${siteUrl}/favicon.svg` } },
+          ...(published ? { datePublished: published } : {}),
+          ...(updated ? { dateModified: updated } : {}),
+          image: `${siteUrl}/og.png`,
+        },
+      ]
+    : [];
+const relTools = tools.map((s) => getTool(s));
+---
+
+<Base title={seoTitle} description={description} path={path} type={type} jsonLd={ld} publishedTime={published} modifiedTime={updated} noindex={noindex}>
+  <div class="container">
+    <Breadcrumb items={breadcrumb} />
+    <header class="page-head">
+      <h1>{title}</h1>
+      <p class="lead">{description}</p>
+      {
+        (published || updated) && (
+          <p class="muted" style="font-size:.85rem">
+            {author}
+            {published && <> · 發布 {published}</>}
+            {updated && <> · 更新 {updated}</>}
+          </p>
+        )
+      }
+    </header>
+
+    <div class={sidebar ? 'grid-2' : ''}>
+      <div class="stack">
+        <article class="card prose">
+          <slot />
+        </article>
+        <AdSlot slot="inArticle" format="fluid" label="文中廣告" />
+        {
+          relTools.length > 0 && (
+            <section aria-label="相關工具">
+              <h2>動手算算看</h2>
+              <div class="tool-grid">
+                {relTools.map((t) => (
+                  <ToolCard tool={t} />
+                ))}
+              </div>
+            </section>
+          )
+        }
+        <Faq items={faq} />
+        <slot name="after" />
+      </div>
+      {
+        sidebar && (
+          <aside class="stack sticky-aside">
+            {offers && <OfferList category={offers} compact />}
+            <AdSlot slot="sidebar" format="rectangle" label="側欄廣告" />
+          </aside>
+        )
+      }
+    </div>
+  </div>
+</Base>

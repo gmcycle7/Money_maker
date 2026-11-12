@@ -1,0 +1,227 @@
+---
+import CalculatorLayout from '../../layouts/CalculatorLayout.astro';
+import { RATE_DEFAULTS, YOUTH_MORTGAGE } from '../../config/tw.ts';
+
+const faq = [
+  {
+    q: '房貸月付金怎麼算？',
+    a: '本息平均攤還的公式是：月付金 = 貸款本金 × 月利率 × (1+月利率)^期數 ÷ [(1+月利率)^期數 − 1]。例如 1,000 萬、年利率 2.3%、30 年，月付約 38,500 元。本頁會自動幫你算，並列出每年的本金、利息與剩餘本金。',
+  },
+  {
+    q: '寬限期是什麼？寬限期結束後月付會增加多少？',
+    a: '寬限期內只繳利息、不還本金，所以月付很低；寬限期結束後，剩餘本金要在更短的年限內還完，月付會明顯跳升。以 1,000 萬、2.3%、30 年、寬限 3 年為例，寬限期內每月約 19,167 元，結束後每月跳到約 42,900 元。本頁會直接顯示「寬限期後月付」，請務必確認自己負擔得起。',
+  },
+  {
+    q: '本息平均攤還和本金平均攤還哪個划算？',
+    a: '本金平均攤還的總利息比較少，但前期月付較高、之後逐月遞減；本息平均攤還每月固定，比較好規劃現金流。如果前期收入有餘裕，本金攤還能省下更多利息；多數人選本息攤還是因為月付固定、好核貸。',
+  },
+  {
+    q: '青安貸款 3.0 的利率怎麼算？',
+    a: `青安 3.0（2026/8/1–2029/7/31）採一段式機動利率，前 3 年 ${YOUTH_MORTGAGE.stages[0].annualRatePct}%，之後補貼逐年退場：第 4 年 1.900%、第 5 年 2.025%、第 6 年 2.150%、第 7 年起 2.275%（以基準利率不變為前提）。本頁選擇「青安 3.0」模式會自動套用這五段利率。`,
+  },
+  {
+    q: '房貸試算結果和銀行核貸會一樣嗎？',
+    a: '不一定。銀行最終利率會依個人信用、收入、擔保品與是否為首購而定，且多數房貸為機動利率，會隨央行升降息調整。本頁試算僅供規劃參考。',
+  },
+];
+
+const sources = [
+  { name: '中央銀行｜五大銀行新承做放款利率統計', href: 'https://www.cbc.gov.tw/' },
+  { name: '財政部｜青年安心成家購屋優惠貸款', href: 'https://www.mof.gov.tw/' },
+  { name: '金管會銀行局｜房貸相關規範', href: 'https://www.banking.gov.tw/' },
+];
+---
+
+<CalculatorLayout slug="mortgage" faq={faq} updated="2026-11-08" sources={sources}>
+  <section class="card">
+    <form id="calc" class="form-grid" novalidate>
+      <div class="field">
+        <label for="amount">貸款金額</label>
+        <div class="input-wrap">
+          <input id="amount" name="amount" type="number" inputmode="decimal" min="1" step="10" value="1000" />
+          <span class="suffix">萬元</span>
+        </div>
+        <span class="hint">例：1,000 萬 = 輸入 1000</span>
+      </div>
+      <div class="field">
+        <label for="years">貸款年限</label>
+        <div class="input-wrap">
+          <input id="years" name="years" type="number" inputmode="numeric" min="1" max="40" step="1" value="30" />
+          <span class="suffix">年</span>
+        </div>
+        <span class="hint">一般 20–30 年，青安最長 40 年</span>
+      </div>
+      <div class="field">
+        <label for="mode">利率方案</label>
+        <div class="input-wrap">
+          <select id="mode" name="mode">
+            <option value="single">一般房貸（自訂利率）</option>
+            <option value="youth">{YOUTH_MORTGAGE.name}（五段利率自動套用）</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" id="rate-field">
+        <label for="rate">年利率</label>
+        <div class="input-wrap">
+          <input id="rate" name="rate" type="number" inputmode="decimal" min="0" max="20" step="0.01" value={RATE_DEFAULTS.mortgage} />
+          <span class="suffix">%</span>
+        </div>
+        <span class="hint">2026/9 五大銀行新承做平均約 2.315%</span>
+      </div>
+      <div class="field">
+        <label for="grace">寬限期</label>
+        <div class="input-wrap">
+          <input id="grace" name="grace" type="number" inputmode="numeric" min="0" max="5" step="1" value="0" />
+          <span class="suffix">年</span>
+        </div>
+        <span class="hint">寬限期內只繳利息（0 = 無）</span>
+      </div>
+      <div class="field">
+        <label>攤還方式</label>
+        <div class="radio-row">
+          <label><input type="radio" name="method" value="annuity" checked /><span>本息平均攤還</span></label>
+          <label><input type="radio" name="method" value="equalPrincipal" /><span>本金平均攤還</span></label>
+        </div>
+      </div>
+    </form>
+
+    <div id="results" class="results" aria-live="polite" style="margin-top:1.25rem"></div>
+
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem">
+      <button type="button" class="btn btn-ghost btn-sm" id="share">複製試算連結</button>
+      <a class="btn btn-ghost btn-sm" href="/tools/loan">改算信貸／車貸 →</a>
+    </div>
+  </section>
+
+  <Fragment slot="article">
+    <h2>房貸試算怎麼看？三個數字最重要</h2>
+    <p>
+      買房前最該搞懂的不是「能貸多少」，而是「每個月要還多少、總共多付多少利息、寬限期結束後會跳到多少」。本頁同時顯示這三個數字，並把 30 年、40 年的每一年本金與利息都列出來。
+    </p>
+    <h2>本息平均攤還公式</h2>
+    <p>
+      每月還款額 = 本金 × 月利率 × (1 + 月利率)<sup>期數</sup> ÷ [(1 + 月利率)<sup>期數</sup> − 1]。
+      月利率 = 年利率 ÷ 12，期數 = 年限 × 12。利率一變，月付金就重算；多段利率（例如青安 3.0）會在利率切換時以剩餘本金與剩餘期數重新計算。
+    </p>
+    <h2>寬限期的真正代價</h2>
+    <p>
+      寬限期讓前幾年很輕鬆，但這幾年完全沒有還本金，等於用更短的時間還同樣的錢，所以寬限期後月付一定比沒有寬限期更高，總利息也更多。
+      如果你打算在寬限期內轉貸或賣屋，寬限期是合理工具；如果是長期自住，請以「寬限期後月付」而不是「寬限期內月付」評估負擔能力。一般建議房貸月付不超過家庭月收入的 1/3。
+    </p>
+    <h2>青安 3.0 要注意什麼</h2>
+    <p>
+      青安 3.0 的補貼從第 4 年開始逐年退場，第 7 年起利率回到 2.275%，而且是「機動利率」：央行升息時會跟著漲。
+      因此用青安 3.0 試算時，請特別看第 4 年、第 7 年月付的變化，不要只看前 3 年。額度上限一般 1,000 萬、新婚 1,200 萬、育兒 1,500 萬，借款人需未滿 50 歲、年所得 200 萬以下。
+    </p>
+    <h2>想降低利息，有三個方法</h2>
+    <ul>
+      <li><strong>縮短年限</strong>：30 年改 20 年，總利息大約少三分之一以上。</li>
+      <li><strong>提前還本</strong>：多數銀行綁約 1–3 年後可部分提前清償，每多還 10 萬，後面的利息就少算 10 萬的部分。</li>
+      <li><strong>轉貸比價</strong>：利率差 0.3% 在 1,000 萬貸款上，30 年約差 50 萬以上利息。</li>
+    </ul>
+    <p>延伸閱讀：<a href="/guides/mortgage-basics">房貸試算完整教學：本息 vs 本金、寬限期、青安 3.0</a></p>
+  </Fragment>
+</CalculatorLayout>
+
+<script>
+  import { amortization, yearlySummary, type RateStage } from '../../lib/finance.ts';
+  import { money, num, readNumber } from '../../lib/format.ts';
+  import { bindCalculator, setupShareButton } from '../../lib/urlstate.ts';
+  import { lineChart } from '../../lib/chart.ts';
+  import { YOUTH_MORTGAGE } from '../../config/tw.ts';
+
+  const form = document.getElementById('calc') as HTMLFormElement;
+  const results = document.getElementById('results')!;
+  const rateField = document.getElementById('rate-field')!;
+  const $ = (id: string) => document.getElementById(id) as HTMLInputElement | HTMLSelectElement;
+
+  function compute() {
+    const amountWan = readNumber($('amount'), 0);
+    const principal = amountWan * 10_000;
+    const years = Math.min(40, Math.max(1, readNumber($('years'), 30)));
+    const mode = ($('mode') as HTMLSelectElement).value;
+    const grace = Math.min(years - 1, Math.max(0, readNumber($('grace'), 0)));
+    const method = (form.elements.namedItem('method') as RadioNodeList).value as 'annuity' | 'equalPrincipal';
+    const youth = mode === 'youth';
+    rateField.style.display = youth ? 'none' : '';
+
+    if (principal <= 0) {
+      results.innerHTML = '<p class="muted">請輸入貸款金額。</p>';
+      return;
+    }
+
+    const stages: RateStage[] | undefined = youth ? YOUTH_MORTGAGE.stages.map((s) => ({ ...s })) : undefined;
+    const rate = readNumber($('rate'), 2.3);
+    const r = amortization({ principal, years, annualRatePct: rate, stages, graceYears: grace, method });
+    const yearly = yearlySummary(r.rows);
+
+    const first = r.firstPayment;
+    const after = r.afterGracePayment;
+    const jump = grace > 0 ? after - first : 0;
+
+    const notices: string[] = [];
+    if (grace > 0) {
+      notices.push(
+        `寬限期 ${grace} 年內每月只繳利息約 <strong>${money(first)}</strong>，第 ${grace * 12 + 1} 期起月付跳升到 <strong>${money(after)}</strong>（＋${money(jump)}）。`,
+      );
+    }
+    if (youth) {
+      const payAt = (month: number) => r.rows[Math.min(month, r.rows.length) - 1]?.payment ?? 0;
+      const m4 = Math.max(37, grace * 12 + 1);
+      const m7 = Math.max(73, grace * 12 + 1);
+      notices.push(
+        `青安 3.0 補貼逐年退場：第 4 年月付約 <strong>${money(payAt(m4))}</strong>、第 7 年起約 <strong>${money(payAt(m7))}</strong>（利率 2.275%，以基準利率不變計）。`,
+      );
+    }
+    if (method === 'equalPrincipal') {
+      notices.push(`本金平均攤還：首期 <strong>${money(r.maxPayment)}</strong>，最後一期約 <strong>${money(r.rows[r.rows.length - 1]!.payment)}</strong>，逐月遞減。`);
+    }
+
+    const incomeNeeded = r.maxPayment * 3;
+
+    const labels = yearly.map((y) => `${y.year}年`);
+    let cum = 0;
+    const cumInterest = yearly.map((y) => (cum += y.interest));
+    const chart = lineChart(
+      labels,
+      [
+        { name: '剩餘本金', values: yearly.map((y) => y.balance), color: 'var(--primary)' },
+        { name: '累計利息', values: cumInterest, color: 'var(--accent)', dashed: true },
+      ],
+      { title: '剩餘本金與累計利息' },
+    );
+
+    const tableRows = yearly
+      .map(
+        (y) =>
+          `<tr><td>第 ${y.year} 年</td><td>${num(y.payment)}</td><td>${num(y.principal)}</td><td>${num(y.interest)}</td><td>${num(y.balance)}</td></tr>`,
+      )
+      .join('');
+
+    results.innerHTML = `
+      <div class="result-hero">
+        <span class="label">${method === 'equalPrincipal' ? '首期月付金' : grace > 0 ? '寬限期內每月應繳' : '每月應繳'}</span>
+        <span class="value">${money(method === 'equalPrincipal' ? r.maxPayment : first)}</span>
+        <span class="sub">${youth ? '青安 3.0 前 3 年利率 1.775%' : `年利率 ${rate}%`}，${years} 年共 ${r.months} 期</span>
+      </div>
+      <div class="stats">
+        ${grace > 0 ? `<div class="stat warn"><div class="k">寬限期後月付</div><div class="v">${money(after)}</div></div>` : ''}
+        <div class="stat"><div class="k">總利息支出</div><div class="v">${money(r.totalInterest)}</div></div>
+        <div class="stat"><div class="k">本利和總還款</div><div class="v">${money(r.totalPayment)}</div></div>
+        <div class="stat"><div class="k">利息佔本金</div><div class="v">${((r.totalInterest / principal) * 100).toFixed(1)}%</div></div>
+        <div class="stat"><div class="k">建議家庭月收入（月付×3）</div><div class="v">${money(incomeNeeded)}</div></div>
+      </div>
+      ${notices.map((n) => `<div class="notice" style="margin-top:1rem">${n}</div>`).join('')}
+      <div style="margin-top:1.25rem">${chart}</div>
+      <details style="margin-top:1rem">
+        <summary>查看每年攤還明細（${yearly.length} 年）</summary>
+        <div class="table-wrap"><table>
+          <thead><tr><th>年度</th><th>當年還款</th><th>償還本金</th><th>支付利息</th><th>年底剩餘本金</th></tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table></div>
+      </details>`;
+  }
+
+  bindCalculator(form, compute);
+  setupShareButton(document.getElementById('share') as HTMLButtonElement);
+</script>

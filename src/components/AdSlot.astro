@@ -1,0 +1,44 @@
+---
+/**
+ * Google AdSense 廣告版位。
+ * - 未設定 client 或 slot：正式站不輸出任何東西；開發模式顯示虛線占位框方便看版面。
+ * - 設定後自動輸出 <ins class="adsbygoogle">。
+ */
+import { MONETIZATION } from '../config/site.ts';
+
+interface Props {
+  slot: keyof typeof MONETIZATION.adsense.slots;
+  format?: 'auto' | 'rectangle' | 'horizontal' | 'fluid';
+  /** 開發模式占位文字 */
+  label?: string;
+  class?: string;
+}
+
+const { slot, format = 'auto', label, class: className = '' } = Astro.props;
+const client = MONETIZATION.adsense.client;
+const slotId = MONETIZATION.adsense.slots[slot];
+const live = Boolean(client && slotId);
+const dev = import.meta.env.DEV;
+---
+
+{
+  live ? (
+    <div class={`ad-slot ${className}`} aria-label="廣告">
+      <ins
+        class="adsbygoogle"
+        style="display:block"
+        data-ad-client={client}
+        data-ad-slot={slotId}
+        data-ad-format={format}
+        data-full-width-responsive="true"
+      />
+      <script is:inline>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+    </div>
+  ) : dev ? (
+    <div class={`ad-slot ${className}`}>
+      <div class="ad-placeholder">廣告版位「{slot}」｜{label ?? 'AdSense 審核通過後填入 src/config/site.ts 即顯示'}</div>
+    </div>
+  ) : null
+}

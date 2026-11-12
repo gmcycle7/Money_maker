@@ -1,0 +1,274 @@
+---
+import CalculatorLayout from '../../layouts/CalculatorLayout.astro';
+import { INCOME_TAX_YEARS, INCOME_TAX } from '../../config/tw.ts';
+import { num } from '../../lib/format.ts';
+
+const T = INCOME_TAX;
+const faq = [
+  {
+    q: `${T.taxYear} 年度綜合所得稅免稅額、扣除額是多少？`,
+    a: `免稅額每人 ${num(T.exemption)} 元（70 歲以上 ${num(T.exemptionSenior)} 元）；標準扣除額單身 ${num(T.standardDeductionSingle)} 元、有配偶 ${num(T.standardDeductionMarried)} 元；薪資所得特別扣除額每人 ${num(T.salaryDeduction)} 元；基本生活費每人 ${num(T.basicLiving)} 元。`,
+  },
+  {
+    q: '單身上班族年薪多少以下不用繳稅？',
+    a: `免稅額 ${num(T.exemption)} ＋ 標準扣除額 ${num(T.standardDeductionSingle)} ＋ 薪資特別扣除額 ${num(T.salaryDeduction)} = ${num(T.exemption + T.standardDeductionSingle + T.salaryDeduction)} 元。年薪（含獎金）在這個金額以下，應納稅額為 0。`,
+  },
+  {
+    q: '所得稅級距怎麼算？什麼是累進差額？',
+    a: '綜合所得淨額 × 稅率 − 累進差額 = 應納稅額。累進差額是為了讓「只有超過級距上限的部分才適用較高稅率」而設計的捷徑。例如淨額 100 萬：100 萬 × 12% − 41,300 = 78,700 元。',
+  },
+  {
+    q: '基本生活費差額是什麼？',
+    a: `納稅者權利保護法規定每人基本生活所需費用（${T.taxYear} 年度 ${num(T.basicLiving)} 元）不得課稅。若「基本生活費總額」大於「免稅額＋一般扣除額＋部分特別扣除額（不含薪資）」，差額可以再從所得中扣除。扶養人口越多，越容易用到。`,
+  },
+  {
+    q: '股利要合併計稅還是分開計稅？',
+    a: '可二擇一：合併計稅時股利的 8.5% 可抵減稅額（每戶上限 8 萬）；分開計稅則以 28% 單一稅率。一般而言適用稅率 20% 以下選合併較划算，30% 以上選分開。本頁會自動幫你選稅負較低的方案。',
+  },
+];
+
+const sources = [
+  { name: '財政部賦稅署｜綜合所得稅免稅額、扣除額及課稅級距公告', href: 'https://www.dot.gov.tw/' },
+  { name: '財政部電子申報繳稅服務網', href: 'https://tax.nat.gov.tw/' },
+  { name: '財政部｜基本生活費公告', href: 'https://www.mof.gov.tw/' },
+];
+---
+
+<CalculatorLayout slug="income-tax" faq={faq} updated="2026-11-08" sources={sources}>
+  <section class="card">
+    <form id="calc" novalidate>
+      <div class="form-grid">
+        <div class="field">
+          <label for="year">所得年度</label>
+          <div class="input-wrap">
+            <select id="year" name="year">
+              {INCOME_TAX_YEARS.map((y) => <option value={y.taxYear} selected={y.taxYear === T.taxYear}>{y.taxYear} 年度所得（{y.filingYear} 年 5 月申報）</option>)}
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="status">申報身分</label>
+          <div class="input-wrap">
+            <select id="status" name="status">
+              <option value="single">單身</option>
+              <option value="married1">已婚，一人有薪資</option>
+              <option value="married2">已婚，雙薪</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="salary">全年薪資所得（含獎金，本人＋配偶）</label>
+          <div class="input-wrap">
+            <input id="salary" name="salary" type="number" inputmode="numeric" min="0" step="10000" value="800000" />
+            <span class="suffix">元</span>
+          </div>
+          <span class="hint">看扣繳憑單「給付總額」</span>
+        </div>
+        <div class="field">
+          <label for="other">其他所得（租金、執行業務、兼職…）</label>
+          <div class="input-wrap">
+            <input id="other" name="other" type="number" inputmode="numeric" min="0" step="10000" value="0" />
+            <span class="suffix">元</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="interest">利息所得</label>
+          <div class="input-wrap">
+            <input id="interest" name="interest" type="number" inputmode="numeric" min="0" step="1000" value="0" />
+            <span class="suffix">元</span>
+          </div>
+          <span class="hint">27 萬以內可全額扣除</span>
+        </div>
+        <div class="field">
+          <label for="dividend">股利所得</label>
+          <div class="input-wrap">
+            <input id="dividend" name="dividend" type="number" inputmode="numeric" min="0" step="1000" value="0" />
+            <span class="suffix">元</span>
+          </div>
+          <span class="hint">自動選擇合併／分開計稅較省的方案</span>
+        </div>
+      </div>
+
+      <h3 style="margin-top:1.5rem">扶養與特別扣除</h3>
+      <div class="form-grid">
+        <div class="field">
+          <label for="dep">扶養親屬（70 歲以下）</label>
+          <div class="input-wrap"><input id="dep" name="dep" type="number" inputmode="numeric" min="0" max="10" value="0" /><span class="suffix">人</span></div>
+          <span class="hint">不含本人、配偶</span>
+        </div>
+        <div class="field">
+          <label for="senior">70 歲以上人數</label>
+          <div class="input-wrap"><input id="senior" name="senior" type="number" inputmode="numeric" min="0" max="10" value="0" /><span class="suffix">人</span></div>
+          <span class="hint">含本人、配偶、直系尊親屬</span>
+        </div>
+        <div class="field">
+          <label for="preschool">6 歲以下子女</label>
+          <div class="input-wrap"><input id="preschool" name="preschool" type="number" inputmode="numeric" min="0" max="10" value="0" /><span class="suffix">人</span></div>
+        </div>
+        <div class="field">
+          <label for="college">大專以上子女（教育學費）</label>
+          <div class="input-wrap"><input id="college" name="college" type="number" inputmode="numeric" min="0" max="10" value="0" /><span class="suffix">人</span></div>
+        </div>
+        <div class="field">
+          <label for="disabled">身心障礙人數</label>
+          <div class="input-wrap"><input id="disabled" name="disabled" type="number" inputmode="numeric" min="0" max="10" value="0" /><span class="suffix">人</span></div>
+        </div>
+        <div class="field">
+          <label for="ltc">長期照顧人數</label>
+          <div class="input-wrap"><input id="ltc" name="ltc" type="number" inputmode="numeric" min="0" max="10" value="0" /><span class="suffix">人</span></div>
+        </div>
+        <div class="field">
+          <label for="rent">全年房屋租金支出</label>
+          <div class="input-wrap"><input id="rent" name="rent" type="number" inputmode="numeric" min="0" step="10000" value="0" /><span class="suffix">元</span></div>
+          <span class="hint">無自有房屋者，上限 18 萬</span>
+        </div>
+        <div class="field">
+          <label for="itemized">列舉扣除額合計（0 = 用標準扣除額）</label>
+          <div class="input-wrap"><input id="itemized" name="itemized" type="number" inputmode="numeric" min="0" step="10000" value="0" /><span class="suffix">元</span></div>
+          <span class="hint">保險費、醫藥費、捐贈、房貸利息等</span>
+        </div>
+        <div class="field">
+          <label for="withheld">已扣繳稅額</label>
+          <div class="input-wrap"><input id="withheld" name="withheld" type="number" inputmode="numeric" min="0" step="1000" value="0" /><span class="suffix">元</span></div>
+          <span class="hint">看扣繳憑單「扣繳稅額」</span>
+        </div>
+      </div>
+    </form>
+
+    <div id="results" aria-live="polite" style="margin-top:1.25rem"></div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem">
+      <button type="button" class="btn btn-ghost btn-sm" id="share">複製試算連結</button>
+      <a class="btn btn-ghost btn-sm" href="/recommend/credit-cards">繳稅用哪張信用卡最划算？ →</a>
+    </div>
+  </section>
+
+  <Fragment slot="article">
+    <h2>綜合所得稅的計算流程</h2>
+    <ol>
+      <li><strong>綜合所得總額</strong>：薪資、利息、股利、租金、執行業務等所有所得加總。</li>
+      <li>減 <strong>免稅額</strong>（每人 {num(T.exemption)}，70 歲以上 {num(T.exemptionSenior)}）。</li>
+      <li>減 <strong>一般扣除額</strong>：標準扣除額（單身 {num(T.standardDeductionSingle)}／有配偶 {num(T.standardDeductionMarried)}）或列舉扣除額擇一。</li>
+      <li>減 <strong>特別扣除額</strong>：薪資 {num(T.salaryDeduction)}／人、儲蓄投資 27 萬／戶、幼兒學前第 1 名 15 萬、第 2 名起 22.5 萬、教育學費 2.5 萬、身心障礙 {num(T.disabilityDeduction)}、長期照顧 18 萬、房屋租金 18 萬。</li>
+      <li>減 <strong>基本生活費差額</strong>（若有）。</li>
+      <li>= <strong>綜合所得淨額</strong> → 套用級距 × 稅率 − 累進差額 = 應納稅額。</li>
+      <li>減 已扣繳稅額、股利可抵減稅額 = <strong>應補（退）稅額</strong>。</li>
+    </ol>
+    <h2>{T.taxYear} 年度課稅級距</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>綜合所得淨額</th><th>稅率</th><th>累進差額</th></tr></thead>
+        <tbody>
+          {
+            T.brackets.map((b, i) => (
+              <tr>
+                <td>{i === 0 ? `0 – ${num(b.upTo)}` : b.upTo === Infinity ? `${num(T.brackets[i - 1]!.upTo + 1)} 以上` : `${num(T.brackets[i - 1]!.upTo + 1)} – ${num(b.upTo)}`}</td>
+                <td>{(b.rate * 100).toFixed(0)}%</td>
+                <td>{num(b.quick)}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+    <h2>合法節稅的四個重點</h2>
+    <ul>
+      <li><strong>列舉 vs 標準</strong>：房貸利息（上限 30 萬，需減儲蓄投資扣除額）、保險費（每人 2.4 萬＋健保費全額）、醫藥費、捐贈加總若超過標準扣除額，就改列舉。</li>
+      <li><strong>勞退自提 6%</strong>：自提金額不計入當年度薪資所得，年薪 100 萬、稅率 12% 的人每年可省約 7,200 元稅。試算：<a href="/tools/pension">勞退新制試算</a>。</li>
+      <li><strong>股利計稅方式</strong>：稅率 20% 以下選合併＋8.5% 抵減；30% 以上選 28% 分開。</li>
+      <li><strong>扶養認定</strong>：扶養 70 歲以上父母免稅額加碼 50%；兄弟姊妹、其他親屬需符合同居或實際扶養條件。</li>
+    </ul>
+    <p class="muted">{T.note}</p>
+  </Fragment>
+</CalculatorLayout>
+
+<script>
+  import { incomeTax, type IncomeTaxInput } from '../../lib/finance.ts';
+  import { INCOME_TAX_YEARS } from '../../config/tw.ts';
+  import { money, num, pct, readNumber } from '../../lib/format.ts';
+  import { bindCalculator, setupShareButton } from '../../lib/urlstate.ts';
+
+  const form = document.getElementById('calc') as HTMLFormElement;
+  const results = document.getElementById('results')!;
+  const $ = (id: string) => document.getElementById(id) as HTMLInputElement | HTMLSelectElement;
+
+  function compute() {
+    const yearVal = Number(($('year') as HTMLSelectElement).value);
+    const T = INCOME_TAX_YEARS.find((y) => y.taxYear === yearVal) ?? INCOME_TAX_YEARS[0]!;
+    const status = ($('status') as HTMLSelectElement).value;
+    const married = status !== 'single';
+    const earners: 1 | 2 = status === 'married2' ? 2 : 1;
+
+    const input: IncomeTaxInput = {
+      salaryIncome: readNumber($('salary')),
+      salaryEarners: earners,
+      otherIncome: readNumber($('other')),
+      interestIncome: readNumber($('interest')),
+      dividendIncome: readNumber($('dividend')),
+      married,
+      dependentsUnder70: readNumber($('dep')),
+      seniors70Plus: readNumber($('senior')),
+      preschoolChildren: readNumber($('preschool')),
+      collegeChildren: readNumber($('college')),
+      disabled: readNumber($('disabled')),
+      longTermCare: readNumber($('ltc')),
+      rentPaid: readNumber($('rent')),
+      itemizedDeductions: readNumber($('itemized')),
+      withheld: readNumber($('withheld')),
+    };
+    const r = incomeTax(input, T);
+    const sd = r.specialDeductions;
+
+    const line = (k: string, v: number, strong = false) =>
+      v !== 0 || strong ? `<tr><td>${k}</td><td>${strong ? `<strong>${num(v)}</strong>` : num(v)}</td></tr>` : '';
+
+    const dividendText =
+      r.dividendMode === 'combined'
+        ? `股利採<strong>合併計稅</strong>，可抵減稅額 ${money(r.dividendCredit)}（8.5%，上限 8 萬）。`
+        : r.dividendMode === 'separate'
+          ? `股利採<strong>分開計稅 28%</strong>，稅額 ${money(r.dividendSeparateTax)}，比合併計稅划算。`
+          : '';
+
+    results.innerHTML = `
+      <div class="result-hero">
+        <span class="label">${r.balanceDue >= 0 ? '預估應補繳稅額' : '預估可退稅額'}</span>
+        <span class="value">${money(Math.abs(r.balanceDue))}</span>
+        <span class="sub">應納稅額 ${money(r.taxPayable)}，已扣繳 ${money(input.withheld)}；${T.taxYear} 年度參數</span>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="k">綜合所得淨額</div><div class="v">${money(r.netIncome)}</div></div>
+        <div class="stat"><div class="k">適用稅率</div><div class="v">${(r.bracketRate * 100).toFixed(0)}%</div></div>
+        <div class="stat"><div class="k">有效稅率（稅額÷總所得）</div><div class="v">${pct(r.effectiveRate, 1)}</div></div>
+        <div class="stat"><div class="k">一般扣除額</div><div class="v">${r.usedItemized ? '列舉' : '標準'} ${num(r.generalDeduction)}</div></div>
+      </div>
+      ${dividendText ? `<div class="notice" style="margin-top:1rem">${dividendText}</div>` : ''}
+      ${r.basicLivingDifference > 0 ? `<div class="notice" style="margin-top:1rem">基本生活費差額 <strong>${money(r.basicLivingDifference)}</strong> 已自動扣除（基本生活費總額 ${money(r.basicLivingTotal)}）。</div>` : ''}
+      ${r.taxPayable === 0 ? `<div class="notice" style="margin-top:1rem">依目前資料免繳所得稅。若有扣繳稅額，記得申報才能退稅。</div>` : ''}
+      <details style="margin-top:1rem" open>
+        <summary>計算明細</summary>
+        <div class="table-wrap"><table>
+          <tbody>
+            ${line('綜合所得總額', r.grossIncome, true)}
+            ${line('− 免稅額', -r.exemptions)}
+            ${line(`− ${r.usedItemized ? '列舉' : '標準'}扣除額`, -r.generalDeduction)}
+            ${line('− 薪資所得特別扣除額', -sd.salary)}
+            ${line('− 儲蓄投資特別扣除額', -sd.savings)}
+            ${line('− 幼兒學前特別扣除額', -sd.preschool)}
+            ${line('− 教育學費特別扣除額', -sd.tuition)}
+            ${line('− 身心障礙特別扣除額', -sd.disability)}
+            ${line('− 長期照顧特別扣除額', -sd.longTermCare)}
+            ${line('− 房屋租金支出特別扣除額', -sd.rent)}
+            ${line('− 基本生活費差額', -r.basicLivingDifference)}
+            ${line('= 綜合所得淨額', r.netIncome, true)}
+            ${line(`× 稅率 ${(r.bracketRate * 100).toFixed(0)}% − 累進差額 = 應納稅額`, r.taxBeforeCredit, true)}
+            ${line('− 股利可抵減稅額', -r.dividendCredit)}
+            ${line('+ 股利分開計稅稅額', r.dividendSeparateTax)}
+            ${line('− 已扣繳稅額', -input.withheld)}
+            ${line(r.balanceDue >= 0 ? '= 應補繳' : '= 應退稅', Math.abs(r.balanceDue), true)}
+          </tbody>
+        </table></div>
+      </details>`;
+  }
+
+  bindCalculator(form, compute);
+  setupShareButton(document.getElementById('share') as HTMLButtonElement);
+</script>

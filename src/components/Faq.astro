@@ -1,0 +1,41 @@
+---
+export type FaqItem = { q: string; a: string };
+
+interface Props {
+  items: FaqItem[];
+  title?: string;
+}
+const { items, title = '常見問題' } = Astro.props;
+
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: items.map((i) => ({
+    '@type': 'Question',
+    name: i.q,
+    acceptedAnswer: { '@type': 'Answer', text: i.a },
+  })),
+};
+---
+
+{
+  items.length > 0 && (
+    <section class="faq" aria-label={title}>
+      <h2>{title}</h2>
+      {items.map((i, idx) => (
+        <details open={idx === 0}>
+          <summary>{i.q}</summary>
+          <p set:html={i.a} />
+        </details>
+      ))}
+      <script type="application/ld+json" set:html={JSON.stringify(ld)} />
+    </section>
+  )
+}
+
+<style>
+  .faq p {
+    margin: 0;
+    color: var(--muted);
+  }
+</style>

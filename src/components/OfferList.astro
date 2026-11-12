@@ -1,0 +1,83 @@
+---
+/**
+ * 聯盟商品卡片清單。只顯示有填 url 的項目（開發模式會連範例一起顯示）。
+ */
+import { OFFERS, type OfferCategory } from '../config/site.ts';
+
+interface Props {
+  category: OfferCategory;
+  title?: string;
+  /** 最多顯示幾張 */
+  limit?: number;
+  compact?: boolean;
+}
+
+const TITLES: Record<OfferCategory, string> = {
+  creditCards: '熱門信用卡辦卡優惠',
+  brokers: '證券開戶優惠',
+  loans: '貸款方案參考',
+  insurance: '保險規劃參考',
+  savings: '高利活存參考',
+};
+
+const { category, title = TITLES[category], limit = 3, compact = false } = Astro.props;
+const dev = import.meta.env.DEV;
+const offers = OFFERS[category].filter((o) => o.url || dev).slice(0, limit);
+---
+
+{
+  offers.length > 0 && (
+    <section class={`offers ${compact ? 'compact' : ''}`} aria-label={title}>
+      <h2 class="offers-title">{title}</h2>
+      <p class="disclosure">以下含聯盟行銷連結，透過連結申辦本站可能獲得分潤，不影響您的權益。資訊以官方公告為準。</p>
+      <div class="offers-grid">
+        {offers.map((o) => (
+          <article class="offer">
+            {o.badge && <span class="badge">{o.badge}</span>}
+            <h3>{o.name}</h3>
+            <p class="pitch">{o.pitch}</p>
+            {o.highlights.length > 0 && (
+              <ul>
+                {o.highlights.map((h) => (
+                  <li>{h}</li>
+                ))}
+              </ul>
+            )}
+            {o.url ? (
+              <a
+                class="btn btn-accent btn-sm"
+                href={o.url}
+                target="_blank"
+                rel="sponsored nofollow noopener"
+                data-affiliate={o.id}
+                data-category={category}
+              >
+                查看優惠 →
+              </a>
+            ) : (
+              <span class="btn btn-ghost btn-sm" aria-disabled="true">
+                （開發模式）尚未填入連結
+              </span>
+            )}
+            {o.note && <div class="note">{o.note}</div>}
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .offers-title {
+    font-size: 1.15rem;
+    margin: 0 0 0.25rem;
+  }
+  .offers-grid {
+    display: grid;
+    gap: 1rem;
+    margin-top: 0.75rem;
+  }
+  .offers:not(.compact) .offers-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+</style>
